@@ -1,488 +1,648 @@
-import { useState, useEffect, useRef } from "react";
-import SmartSimpleBrilliant from "@/components/landing/SmartSimpleBrilliant";
-import YourWorkInSync from "@/components/landing/YourWorkInSync";
-import EffortlessIntegration from "@/components/landing/EffortlessIntegration";
-import NumbersThatSpeak from "@/components/landing/NumbersThatSpeak";
-import DocumentationSection from "@/components/landing/DocumentationSection";
-import TestimonialsSection from "@/components/landing/TestimonialsSection";
-import FAQSection from "@/components/landing/FAQSection";
-import PricingSection from "@/components/landing/PricingSection";
-import CTASection from "@/components/landing/CTASection";
-import FooterSection from "@/components/landing/FooterSection";
+import { useState } from "react";
+import Icon from "@/components/ui/icon";
 
-interface BadgeProps {
-  icon: React.ReactNode;
-  text: string;
-}
+const NAV_LINKS = ["Главная", "О нас", "Специалисты", "Курсы", "Контакты"];
 
-function Badge({ icon, text }: BadgeProps) {
-  return (
-    <div className="px-[14px] py-[6px] bg-white shadow-[0px_0px_0px_4px_rgba(55,50,47,0.05)] overflow-hidden rounded-[90px] flex justify-start items-center gap-[8px] border border-[rgba(2,6,23,0.08)]">
-      <div className="w-[14px] h-[14px] relative overflow-hidden flex items-center justify-center">{icon}</div>
-      <div className="text-center flex justify-center flex-col text-[#37322F] text-xs font-medium leading-3 font-sans">
-        {text}
-      </div>
-    </div>
-  );
-}
+const SPECIALISTS = [
+  {
+    name: "Дмитров Иван Валерьевич",
+    role: "Главный нутрициолог",
+    experience: "12 лет опыта",
+    description:
+      "Кандидат медицинских наук, специалист по клинической нутрициологии и диетотерапии. Автор методик коррекции веса и лечебного питания.",
+    courses: ["Нутрициология: основы", "Как распределить БЖУ: основы"],
+    avatar: "ДИ",
+    color: "from-emerald-400 to-teal-500",
+  },
+  {
+    name: "Горбачева Алла Алексеевна",
+    role: "Диетолог-нутрициолог",
+    experience: "8 лет опыта",
+    description:
+      "Эксперт по функциональному питанию и здоровому образу жизни. Специализируется на разработке индивидуальных планов питания для улучшения здоровья.",
+    courses: ["Правильное питание — залог здоровья"],
+    avatar: "ГА",
+    color: "from-lime-400 to-green-500",
+  },
+  {
+    name: "Нечаев Егор Антонович",
+    role: "Спортивный нутрициолог",
+    experience: "6 лет опыта",
+    description:
+      "Специалист по спортивному питанию и оптимизации физической формы. Работает с профессиональными спортсменами и любителями активного образа жизни.",
+    courses: ["Как распределить БЖУ: основы", "Нутрициология: основы"],
+    avatar: "НЕ",
+    color: "from-green-400 to-emerald-600",
+  },
+];
 
-interface FeatureCardProps {
-  title: string;
-  description: string;
-  isActive: boolean;
-  progress: number;
-  onClick: () => void;
-}
+const COURSES = [
+  {
+    title: "Нутрициология: основы",
+    duration: "4 недели",
+    lessons: "16 уроков",
+    level: "Начинающий",
+    description:
+      "Фундаментальный курс о науке питания. Вы узнаете, как работают питательные вещества в организме, научитесь читать состав продуктов и строить здоровый рацион.",
+    topics: ["Макро- и микронутриенты", "Пищеварительная система", "Витамины и минералы", "Питьевой режим"],
+    color: "from-emerald-50 to-teal-50",
+    accent: "#10b981",
+    icon: "BookOpen",
+    teacher: "Дмитров И.В. / Нечаев Е.А.",
+  },
+  {
+    title: "Правильное питание — залог здоровья",
+    duration: "6 недель",
+    lessons: "24 урока",
+    level: "Средний",
+    description:
+      "Глубокое погружение в связь между питанием и здоровьем. Практические инструменты для составления сбалансированного рациона на каждый день.",
+    topics: ["Гликемический индекс", "Антиоксиданты", "Детокс-питание", "Питание при заболеваниях"],
+    color: "from-lime-50 to-green-50",
+    accent: "#84cc16",
+    icon: "Heart",
+    teacher: "Горбачева А.А.",
+  },
+  {
+    title: "Как распределить БЖУ: основы",
+    duration: "3 недели",
+    lessons: "12 уроков",
+    level: "Начинающий",
+    description:
+      "Практический курс по расчёту и балансировке белков, жиров и углеводов под ваши цели — похудение, набор массы или поддержание формы.",
+    topics: ["Расчёт нормы калорий", "Белки в рационе", "Полезные жиры", "Сложные углеводы"],
+    color: "from-green-50 to-emerald-50",
+    accent: "#059669",
+    icon: "BarChart2",
+    teacher: "Нечаев Е.А. / Дмитров И.В.",
+  },
+];
 
-function FeatureCard({ title, description, isActive, progress, onClick }: FeatureCardProps) {
-  return (
-    <div
-      className={`w-full md:flex-1 self-stretch px-6 py-5 overflow-hidden flex flex-col justify-start items-start gap-2 cursor-pointer relative border-b md:border-b-0 last:border-b-0 ${
-        isActive
-          ? "bg-white shadow-[0px_0px_0px_0.75px_#E0DEDB_inset]"
-          : "border-l-0 border-r-0 md:border border-[#E0DEDB]/80"
-      }`}
-      onClick={onClick}
-    >
-      {isActive && (
-        <div className="absolute top-0 left-0 w-full h-0.5 bg-[rgba(50,45,43,0.08)]">
-          <div
-            className="h-full bg-[#322D2B] transition-all duration-100 ease-linear"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
-
-      <div className="self-stretch flex justify-center flex-col text-[#49423D] text-sm md:text-sm font-semibold leading-6 md:leading-6 font-sans">
-        {title}
-      </div>
-      <div className="self-stretch text-[#605A57] text-[13px] md:text-[13px] font-normal leading-[22px] md:leading-[22px] font-sans">
-        {description}
-      </div>
-    </div>
-  );
-}
+const STATS = [
+  { value: "2500+", label: "Выпускников" },
+  { value: "98%", label: "Довольны результатом" },
+  { value: "3", label: "Эксперта-нутрициолога" },
+  { value: "5 лет", label: "На рынке образования" },
+];
 
 export default function Index() {
-  const [activeCard, setActiveCard] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const mountedRef = useRef(true);
+  const [activeSection, setActiveSection] = useState("Главная");
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
 
-  useEffect(() => {
-    const progressInterval = setInterval(() => {
-      if (!mountedRef.current) return;
-
-      setProgress((prev) => {
-        if (prev >= 100) {
-          if (mountedRef.current) {
-            setActiveCard((current) => (current + 1) % 3);
-          }
-          return 0;
-        }
-        return prev + 2;
-      });
-    }, 100);
-
-    return () => {
-      clearInterval(progressInterval);
-      mountedRef.current = false;
+  const scrollTo = (section: string) => {
+    setActiveSection(section);
+    const id = section.toLowerCase().replace(/\s/g, "-");
+    const map: Record<string, string> = {
+      "главная": "hero",
+      "о нас": "about",
+      "специалисты": "specialists",
+      "курсы": "courses",
+      "контакты": "contacts",
     };
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  const handleCardClick = (index: number) => {
-    if (!mountedRef.current) return;
-    setActiveCard(index);
-    setProgress(0);
+    const el = document.getElementById(map[section.toLowerCase()] || id);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <div className="w-full min-h-screen relative bg-[#F7F5F3] overflow-x-hidden flex flex-col justify-start items-center">
-      <div className="relative flex flex-col justify-start items-center w-full">
-        <div className="w-full max-w-none px-4 sm:px-6 md:px-8 lg:px-0 lg:max-w-[1060px] lg:w-[1060px] relative flex flex-col justify-start items-start min-h-screen">
-          {/* Вертикальные линии */}
-          <div className="w-[1px] h-full absolute left-4 sm:left-6 md:left-8 lg:left-0 top-0 bg-[rgba(55,50,47,0.12)] shadow-[1px_0px_0px_white] z-0"></div>
-          <div className="w-[1px] h-full absolute right-4 sm:right-6 md:right-8 lg:right-0 top-0 bg-[rgba(55,50,47,0.12)] shadow-[1px_0px_0px_white] z-0"></div>
-
-          <div className="self-stretch pt-[9px] overflow-hidden border-b border-[rgba(55,50,47,0.06)] flex flex-col justify-center items-center gap-4 sm:gap-6 md:gap-8 lg:gap-[66px] relative z-10">
-            {/* Навигация */}
-            <div className="w-full h-12 sm:h-14 md:h-16 lg:h-[84px] absolute left-0 top-0 flex justify-center items-center z-20 px-6 sm:px-8 md:px-12 lg:px-0">
-              <div className="w-full h-0 absolute left-0 top-6 sm:top-7 md:top-8 lg:top-[42px] border-t border-[rgba(55,50,47,0.12)] shadow-[0px_1px_0px_white]"></div>
-
-              <div className="w-full max-w-[calc(100%-32px)] sm:max-w-[calc(100%-48px)] md:max-w-[calc(100%-64px)] lg:max-w-[700px] lg:w-[700px] h-10 sm:h-11 md:h-12 py-1.5 sm:py-2 px-3 sm:px-4 md:px-4 pr-2 sm:pr-3 bg-[#F7F5F3] backdrop-blur-sm shadow-[0px_0px_0px_2px_white] overflow-hidden rounded-[50px] flex justify-between items-center relative z-30">
-                <div className="flex justify-center items-center">
-                  <div className="flex justify-start items-center">
-                    <div className="flex flex-col justify-center text-[#2F3037] text-sm sm:text-base md:text-lg lg:text-xl font-medium leading-5 font-sans">
-                      Микс
-                    </div>
-                  </div>
-                  <div className="pl-3 sm:pl-4 md:pl-5 lg:pl-5 hidden sm:flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-4">
-                    <div className="flex justify-start items-center">
-                      <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans">
-                        Коллекция
-                      </div>
-                    </div>
-                    <div className="flex justify-start items-center">
-                      <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans">
-                        О нас
-                      </div>
-                    </div>
-                    <div className="flex justify-start items-center">
-                      <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans">
-                        Контакты
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="h-6 sm:h-7 md:h-8 flex justify-start items-start gap-2 sm:gap-3">
-                  <div className="px-2 sm:px-3 md:px-[14px] py-1 sm:py-[6px] bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] overflow-hidden rounded-full flex justify-center items-center">
-                    <div className="flex flex-col justify-center text-[#37322F] text-xs md:text-[13px] font-medium leading-5 font-sans">
-                      Каталог
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <div className="min-h-screen bg-white font-sans">
+      {/* ─── ШАПКА ─── */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-green-100 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-md">
+              <span className="text-white text-lg">🥦</span>
             </div>
+            <div>
+              <div className="font-bold text-gray-900 text-sm leading-tight">Питайся Правильно</div>
+              <div className="text-[10px] text-emerald-600 font-medium">Онлайн-школа нутрициологии</div>
+            </div>
+          </div>
+          <nav className="hidden md:flex items-center gap-1">
+            {NAV_LINKS.map((link) => (
+              <button
+                key={link}
+                onClick={() => scrollTo(link)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  activeSection === link
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "text-gray-600 hover:text-emerald-700 hover:bg-emerald-50"
+                }`}
+              >
+                {link}
+              </button>
+            ))}
+          </nav>
+          <button
+            onClick={() => scrollTo("Курсы")}
+            className="bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-semibold px-5 py-2 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
+          >
+            Начать учиться
+          </button>
+        </div>
+      </header>
 
-            {/* Hero секция */}
-            <div className="pt-16 sm:pt-20 md:pt-24 lg:pt-[216px] pb-8 sm:pb-12 md:pb-16 flex flex-col justify-start items-center px-2 sm:px-4 md:px-8 lg:px-0 w-full">
-              <div className="w-full max-w-[937px] lg:w-[937px] flex flex-col justify-center items-center gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-                <div className="self-stretch rounded-[3px] flex flex-col justify-center items-center gap-4 sm:gap-5 md:gap-6 lg:gap-8">
-                  <div className="w-full max-w-[748.71px] lg:w-[748.71px] text-center flex justify-center flex-col text-[#37322F] text-[24px] sm:text-[36px] md:text-[52px] lg:text-[80px] font-normal leading-[1.1] sm:leading-[1.15] md:leading-[1.2] lg:leading-[96px] font-serif px-2 sm:px-4 md:px-0">
-                    Одежда для каждого дня
-                  </div>
-                  <div className="w-full max-w-[506.08px] lg:w-[506.08px] text-center flex justify-center flex-col text-[rgba(55,50,47,0.80)] sm:text-lg md:text-xl leading-[1.4] sm:leading-[1.45] md:leading-[1.5] lg:leading-7 font-sans px-2 sm:px-4 md:px-0 lg:text-lg font-medium text-sm">
-                    Футболки, джинсы и кофты с капюшоном —
-                    <br className="hidden sm:block" />
-                    стиль без лишних усилий от магазина Микс.
-                  </div>
+      {/* ─── ГЕРОЙ ─── */}
+      <section id="hero" className="pt-16 min-h-screen flex flex-col relative overflow-hidden">
+        {/* Фоновые декоративные элементы */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 right-0 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-60" />
+          <div className="absolute bottom-20 left-0 w-80 h-80 bg-lime-100 rounded-full blur-3xl opacity-50" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-green-50 rounded-full blur-3xl opacity-40" />
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col lg:flex-row items-center gap-12 py-16 flex-1 relative z-10">
+          <div className="flex-1 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-full px-4 py-2 mb-6">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-emerald-700 text-sm font-medium">Онлайн-школа нутрициологии</span>
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+              Питание, которое{" "}
+              <span className="relative">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-600">
+                  меняет жизнь
+                </span>
+                <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 12" fill="none">
+                  <path d="M2 8 Q75 2 150 8 Q225 14 298 8" stroke="#10b981" strokeWidth="3" strokeLinecap="round" fill="none" />
+                </svg>
+              </span>
+            </h1>
+            <p className="text-lg text-gray-500 leading-relaxed mb-8 max-w-xl mx-auto lg:mx-0">
+              Освойте науку правильного питания с нашими экспертами. Практические курсы от сертифицированных нутрициологов — от основ до профессионального уровня.
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+              <button
+                onClick={() => scrollTo("Курсы")}
+                className="bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-2"
+              >
+                <Icon name="BookOpen" size={20} />
+                Смотреть курсы
+              </button>
+              <button
+                onClick={() => scrollTo("О нас")}
+                className="bg-white border-2 border-emerald-200 text-emerald-700 font-bold px-8 py-4 rounded-2xl hover:bg-emerald-50 transition-all duration-200 flex items-center gap-2"
+              >
+                <Icon name="Play" size={20} />
+                Узнать больше
+              </button>
+            </div>
+            <div className="mt-10 flex flex-wrap gap-6 justify-center lg:justify-start">
+              {STATS.map((s) => (
+                <div key={s.label} className="text-center lg:text-left">
+                  <div className="text-2xl font-bold text-emerald-600">{s.value}</div>
+                  <div className="text-xs text-gray-500">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex-1 max-w-lg w-full">
+            <div className="relative">
+              <div className="absolute -inset-4 bg-gradient-to-br from-emerald-200 to-green-300 rounded-3xl blur-xl opacity-40" />
+              <img
+                src="https://cdn.poehali.dev/projects/13253589-653d-4844-bd50-508297ac9207/files/fde34f90-f951-44f2-a880-9e3dd963e433.jpg"
+                alt="Здоровое питание"
+                className="relative rounded-3xl shadow-2xl w-full object-cover aspect-square"
+              />
+              {/* Плавающие карточки */}
+              <div className="absolute -left-6 top-1/4 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3 border border-green-100">
+                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-xl">🥗</div>
+                <div>
+                  <div className="text-xs text-gray-500">Сегодня изучили</div>
+                  <div className="font-bold text-gray-800 text-sm">БЖУ баланс</div>
                 </div>
               </div>
-
-              <div className="w-full max-w-[497px] lg:w-[497px] flex flex-col justify-center items-center gap-6 sm:gap-8 md:gap-10 lg:gap-12 relative z-10 mt-6 sm:mt-8 md:mt-10 lg:mt-12">
-                <div className="backdrop-blur-[8.25px] flex justify-start items-center gap-4">
-                  <div className="h-10 sm:h-11 md:h-12 px-6 sm:px-8 md:px-10 lg:px-12 py-2 sm:py-[6px] relative bg-[#37322F] shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] overflow-hidden rounded-full flex justify-center items-center cursor-pointer hover:bg-[#2A2520] transition-colors">
-                    <div className="w-20 sm:w-24 md:w-28 lg:w-44 h-[41px] absolute left-0 top-[-0.5px] bg-gradient-to-b from-[rgba(255,255,255,0)] to-[rgba(0,0,0,0.10)] mix-blend-multiply"></div>
-                    <div className="flex flex-col justify-center text-white text-sm sm:text-base md:text-[15px] font-medium leading-5 font-sans">
-                      Смотреть коллекцию
-                    </div>
-                  </div>
+              <div className="absolute -right-6 bottom-1/4 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3 border border-green-100">
+                <div className="w-10 h-10 bg-lime-100 rounded-xl flex items-center justify-center text-xl">⭐</div>
+                <div>
+                  <div className="text-xs text-gray-500">Выпускников</div>
+                  <div className="font-bold text-gray-800 text-sm">2500+ человек</div>
                 </div>
               </div>
-
-              <div className="absolute top-[232px] sm:top-[248px] md:top-[264px] lg:top-[320px] left-1/2 transform -translate-x-1/2 z-0 pointer-events-none">
-                <img
-                  src="/mask-group-pattern.svg"
-                  alt=""
-                  className="w-[936px] sm:w-[1404px] md:w-[2106px] lg:w-[2808px] h-auto opacity-30 sm:opacity-40 md:opacity-50 mix-blend-multiply"
-                  style={{
-                    filter: "hue-rotate(15deg) saturate(0.7) brightness(1.2)",
-                  }}
-                />
-              </div>
-
-              <div className="w-full max-w-[960px] lg:w-[960px] pt-2 sm:pt-4 pb-6 sm:pb-8 md:pb-10 px-2 sm:px-4 md:px-6 lg:px-11 flex flex-col justify-center items-center gap-2 relative z-5 my-8 sm:my-12 md:my-16 lg:my-16 mb-0 lg:pb-0">
-                <div className="w-full max-w-[960px] lg:w-[960px] h-[200px] sm:h-[280px] md:h-[450px] lg:h-[695.55px] bg-white shadow-[0px_0px_0px_0.9056603908538818px_rgba(0,0,0,0.08)] overflow-hidden rounded-[6px] sm:rounded-[8px] lg:rounded-[9.06px] flex flex-col justify-start items-start">
-                  <div className="self-stretch flex-1 flex justify-start items-start">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="relative w-full h-full overflow-hidden">
-                        <div
-                          className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                            activeCard === 0 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
-                          }`}
-                        >
-                          <img
-                            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/dsadsadsa.jpg-xTHS4hGwCWp2H5bTj8np6DXZUyrxX7.jpeg"
-                            alt="Дашборд подписок"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-
-                        <div
-                          className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                            activeCard === 1 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
-                          }`}
-                        >
-                          <img
-                            src="/analytics-dashboard-with-charts-graphs-and-data-vi.jpg"
-                            alt="Аналитический дашборд"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-
-                        <div
-                          className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                            activeCard === 2 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
-                          }`}
-                        >
-                          <img
-                            src="/data-visualization-dashboard-with-interactive-char.jpg"
-                            alt="Визуализация данных"
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="self-stretch border-t border-[#E0DEDB] border-b border-[#E0DEDB] flex justify-center items-start">
-                <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                  <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                    {Array.from({ length: 50 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
-                      ></div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex-1 px-0 sm:px-2 md:px-0 flex flex-col md:flex-row justify-center items-stretch gap-0">
-                  <FeatureCard
-                    title="Футболки на любой случай"
-                    description="Базовые и принтованные футболки из мягких тканей — для дома, прогулок и встреч с друзьями."
-                    isActive={activeCard === 0}
-                    progress={activeCard === 0 ? progress : 0}
-                    onClick={() => handleCardClick(0)}
-                  />
-                  <FeatureCard
-                    title="Джинсы и брюки"
-                    description="Классические и зауженные силуэты, которые сочетаются с любым верхом из нашей коллекции."
-                    isActive={activeCard === 1}
-                    progress={activeCard === 1 ? progress : 0}
-                    onClick={() => handleCardClick(1)}
-                  />
-                  <FeatureCard
-                    title="Кофты с капюшоном"
-                    description="Мягкие и тёплые худи для прохладных дней — удобно носить дома или на улице."
-                    isActive={activeCard === 2}
-                    progress={activeCard === 2 ? progress : 0}
-                    onClick={() => handleCardClick(2)}
-                  />
-                </div>
-
-                <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                  <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                    {Array.from({ length: 50 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
-                      ></div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Секция социального доказательства */}
-              <div className="w-full border-b border-[rgba(55,50,47,0.12)] flex flex-col justify-center items-center">
-                <div className="self-stretch px-4 sm:px-6 md:px-24 py-8 sm:py-12 md:py-16 border-b border-[rgba(55,50,47,0.12)] flex justify-center items-center gap-6">
-                  <div className="w-full max-w-[586px] px-4 sm:px-6 py-4 sm:py-5 overflow-hidden rounded-lg flex flex-col justify-start items-center gap-3 sm:gap-4">
-                    <Badge
-                      icon={
-                        <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect x="1" y="3" width="4" height="6" stroke="#37322F" strokeWidth="1" fill="none" />
-                          <rect x="7" y="1" width="4" height="8" stroke="#37322F" strokeWidth="1" fill="none" />
-                        </svg>
-                      }
-                      text="Нам доверяют"
-                    />
-                    <div className="w-full max-w-[472.55px] text-center flex justify-center flex-col text-[#49423D] text-xl sm:text-2xl md:text-3xl lg:text-5xl font-semibold leading-tight md:leading-[60px] font-sans tracking-tight">
-                      Стиль, который выбирают снова и снова
-                    </div>
-                    <div className="self-stretch text-center text-[#605A57] text-sm sm:text-base font-normal leading-6 sm:leading-7 font-sans">
-                      Покупатели возвращаются к нам,
-                      <br className="hidden sm:block" />
-                      потому что одежда удобна, стильна и по доступной цене.
-                    </div>
-                  </div>
-                </div>
-
-                {/* Сетка логотипов */}
-                <div className="self-stretch border-[rgba(55,50,47,0.12)] flex justify-center items-start border-t border-b-0">
-                  <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                    <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                      {Array.from({ length: 50 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 gap-0 border-l border-r border-[rgba(55,50,47,0.12)]">
-                    {["👕 Футболки", "👖 Джинсы", "🧥 Худи", "🎽 Поло", "🩳 Шорты", "🧣 Аксессуары", "🛍️ Новинки", "🏷️ Скидки"].map((label, index) => (
-                      <div
-                        key={index}
-                        className="h-24 sm:h-32 md:h-36 lg:h-40 flex justify-center items-center gap-1 sm:gap-3 border-b border-[rgba(227,226,225,0.5)] border-r border-[#E3E2E1]"
-                      >
-                        <div className="text-center flex justify-center flex-col text-[#37322F] text-sm sm:text-lg md:text-xl lg:text-2xl font-medium leading-tight md:leading-9 font-sans">
-                          {label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                    <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                      {Array.from({ length: 50 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bento Grid секция */}
-              <div className="w-full border-b border-[rgba(55,50,47,0.12)] flex flex-col justify-center items-center">
-                <div className="self-stretch px-4 sm:px-6 md:px-8 lg:px-0 lg:max-w-[1060px] lg:w-[1060px] py-8 sm:py-12 md:py-16 border-b border-[rgba(55,50,47,0.12)] flex justify-center items-center gap-6">
-                  <div className="w-full max-w-[616px] lg:w-[616px] px-4 sm:px-6 py-4 sm:py-5 overflow-hidden rounded-lg flex flex-col justify-start items-center gap-3 sm:gap-4">
-                    <Badge
-                      icon={
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect x="1" y="1" width="4" height="4" stroke="#37322F" strokeWidth="1" fill="none" />
-                          <rect x="7" y="1" width="4" height="4" stroke="#37322F" strokeWidth="1" fill="none" />
-                          <rect x="1" y="7" width="4" height="4" stroke="#37322F" strokeWidth="1" fill="none" />
-                          <rect x="7" y="7" width="4" height="4" stroke="#37322F" strokeWidth="1" fill="none" />
-                        </svg>
-                      }
-                      text="Возможности"
-                    />
-                    <div className="w-full max-w-[598.06px] lg:w-[598.06px] text-center flex justify-center flex-col text-[#49423D] text-xl sm:text-2xl md:text-3xl lg:text-5xl font-semibold leading-tight md:leading-[60px] font-sans tracking-tight">
-                      Создано для ясности и сосредоточенной работы
-                    </div>
-                    <div className="self-stretch text-center text-[#605A57] text-sm sm:text-base font-normal leading-6 sm:leading-7 font-sans">
-                      Оставайтесь сфокусированными с инструментами, которые организуют,
-                      <br />
-                      связывают и превращают информацию в уверенные решения.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="self-stretch flex justify-center items-start">
-                  <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                    <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                      {Array.from({ length: 200 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-0 border-l border-r border-[rgba(55,50,47,0.12)]">
-                    <div className="border-b border-r-0 md:border-r border-[rgba(55,50,47,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6">
-                      <div className="flex flex-col gap-2">
-                        <h3 className="text-[#37322F] text-lg sm:text-xl font-semibold leading-tight font-sans">
-                          Умно. Просто. Гениально.
-                        </h3>
-                        <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                          Ваши данные красиво организованы, чтобы вы видели все четко без лишнего шума.
-                        </p>
-                      </div>
-                      <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex items-center justify-center overflow-hidden">
-                        <SmartSimpleBrilliant
-                          width="100%"
-                          height="100%"
-                          theme="light"
-                          className="scale-50 sm:scale-65 md:scale-75 lg:scale-90"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="border-b border-[rgba(55,50,47,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6">
-                      <div className="flex flex-col gap-2">
-                        <h3 className="text-[#37322F] font-semibold leading-tight font-sans text-lg sm:text-xl">
-                          Ваша работа синхронизирована
-                        </h3>
-                        <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                          Каждое обновление мгновенно передается вашей команде, делая совместную работу легкой и быстрой.
-                        </p>
-                      </div>
-                      <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden text-right items-center justify-center">
-                        <YourWorkInSync
-                          width="400"
-                          height="250"
-                          theme="light"
-                          className="scale-60 sm:scale-75 md:scale-90"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="border-r-0 md:border-r border-[rgba(55,50,47,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6 bg-transparent">
-                      <div className="flex flex-col gap-2">
-                        <h3 className="text-[#37322F] text-lg sm:text-xl font-semibold leading-tight font-sans">
-                          Легкая интеграция
-                        </h3>
-                        <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                          Все ваши любимые инструменты подключаются в одном месте и работают слаженно.
-                        </p>
-                      </div>
-                      <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden justify-center items-center relative bg-transparent">
-                        <div className="w-full h-full flex items-center justify-center bg-transparent">
-                          <EffortlessIntegration width={400} height={250} className="max-w-full max-h-full" />
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#F7F5F3] to-transparent pointer-events-none"></div>
-                      </div>
-                    </div>
-
-                    <div className="p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6">
-                      <div className="flex flex-col gap-2">
-                        <h3 className="text-[#37322F] text-lg sm:text-xl font-semibold leading-tight font-sans">
-                          Цифры, которые говорят
-                        </h3>
-                        <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                          Отслеживайте рост с точностью и превращайте данные в решения, которым можно доверять.
-                        </p>
-                      </div>
-                      <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden items-center justify-center relative">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <NumbersThatSpeak
-                            width="100%"
-                            height="100%"
-                            theme="light"
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#F7F5F3] to-transparent pointer-events-none"></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                    <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                      {Array.from({ length: 200 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <DocumentationSection />
-              <TestimonialsSection />
-              <PricingSection />
-              <FAQSection />
-              <CTASection />
-              <FooterSection />
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Скролл-индикатор */}
+        <div className="flex justify-center pb-8 relative z-10">
+          <div className="flex flex-col items-center gap-1 text-gray-400 animate-bounce">
+            <span className="text-xs">прокрутите</span>
+            <Icon name="ChevronDown" size={20} />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── О НАС ─── */}
+      <section id="about" className="py-20 bg-gradient-to-br from-emerald-50 via-white to-lime-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 bg-emerald-100 rounded-full px-4 py-2 mb-4">
+              <Icon name="Leaf" size={16} className="text-emerald-600" />
+              <span className="text-emerald-700 text-sm font-semibold">О нас</span>
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Мы — эксперты в мире питания</h2>
+            <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+              «Питайся правильно» — онлайн-школа нутрициологии, где наука встречается с практикой. Мы помогаем людям понять связь между едой и здоровьем.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              {[
+                {
+                  icon: "🎓",
+                  title: "Экспертный подход",
+                  text: "Все курсы разработаны практикующими нутрициологами с медицинским образованием и многолетним опытом.",
+                },
+                {
+                  icon: "📱",
+                  title: "Учитесь в удобное время",
+                  text: "Видеоуроки, практические задания и поддержка куратора — доступны 24/7 с любого устройства.",
+                },
+                {
+                  icon: "🏆",
+                  title: "Сертификат по окончании",
+                  text: "После каждого курса вы получаете именной сертификат, подтверждающий ваши знания.",
+                },
+                {
+                  icon: "🤝",
+                  title: "Сообщество единомышленников",
+                  text: "Присоединяйтесь к закрытому чату выпускников, обменивайтесь опытом и поддерживайте друг друга.",
+                },
+              ].map((item) => (
+                <div key={item.title} className="flex gap-4 p-5 bg-white rounded-2xl shadow-sm border border-green-100 hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 mb-1">{item.title}</h3>
+                    <p className="text-gray-500 text-sm leading-relaxed">{item.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="relative">
+              <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-3xl p-8 text-white shadow-2xl">
+                <div className="text-6xl mb-4">🌿</div>
+                <h3 className="text-2xl font-bold mb-4">Наша миссия</h3>
+                <p className="text-emerald-100 leading-relaxed mb-6">
+                  Сделать знания о правильном питании доступными для каждого. Мы верим, что осознанный подход к еде — это фундамент долгой и здоровой жизни.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { v: "2019", l: "Год основания" },
+                    { v: "3", l: "Эксперта" },
+                    { v: "3", l: "Авторских курса" },
+                    { v: "100%", l: "Онлайн-обучение" },
+                  ].map((s) => (
+                    <div key={s.l} className="bg-white/20 rounded-xl p-3 text-center">
+                      <div className="text-2xl font-bold">{s.v}</div>
+                      <div className="text-emerald-100 text-xs">{s.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── СПЕЦИАЛИСТЫ ─── */}
+      <section id="specialists" className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 bg-emerald-100 rounded-full px-4 py-2 mb-4">
+              <Icon name="Users" size={16} className="text-emerald-600" />
+              <span className="text-emerald-700 text-sm font-semibold">Наши специалисты</span>
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Учите у лучших</h2>
+            <p className="text-gray-500 text-lg max-w-xl mx-auto">
+              Наши преподаватели — практикующие специалисты с реальным клиническим опытом
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {SPECIALISTS.map((spec) => (
+              <div
+                key={spec.name}
+                className="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1"
+              >
+                {/* Шапка карточки */}
+                <div className={`bg-gradient-to-br ${spec.color} p-8 flex flex-col items-center text-white relative overflow-hidden`}>
+                  <div className="absolute inset-0 opacity-20">
+                    {[...Array(6)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="absolute rounded-full bg-white"
+                        style={{
+                          width: `${40 + i * 20}px`,
+                          height: `${40 + i * 20}px`,
+                          top: `${-10 + i * 5}px`,
+                          right: `${-10 + i * 8}px`,
+                          opacity: 0.3 - i * 0.04,
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <div className="w-20 h-20 bg-white/30 backdrop-blur rounded-full flex items-center justify-center text-2xl font-bold mb-3 border-4 border-white/50 relative z-10">
+                    {spec.avatar}
+                  </div>
+                  <div className="relative z-10 text-center">
+                    <h3 className="font-bold text-lg leading-tight">{spec.name}</h3>
+                    <p className="text-white/80 text-sm mt-1">{spec.role}</p>
+                    <div className="mt-2 inline-flex items-center gap-1 bg-white/20 rounded-full px-3 py-1 text-xs font-medium">
+                      <Icon name="Award" size={12} />
+                      {spec.experience}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Тело карточки */}
+                <div className="p-6 space-y-4">
+                  <p className="text-gray-500 text-sm leading-relaxed">{spec.description}</p>
+                  <div>
+                    <div className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 flex items-center gap-1">
+                      <Icon name="BookOpen" size={12} className="text-emerald-500" />
+                      Преподаёт курсы:
+                    </div>
+                    <div className="space-y-1">
+                      {spec.courses.map((course) => (
+                        <div
+                          key={course}
+                          className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2"
+                        >
+                          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full flex-shrink-0" />
+                          {course}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── КУРСЫ ─── */}
+      <section id="courses" className="py-20 bg-gradient-to-br from-gray-50 to-emerald-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 bg-emerald-100 rounded-full px-4 py-2 mb-4">
+              <Icon name="GraduationCap" size={16} className="text-emerald-600" />
+              <span className="text-emerald-700 text-sm font-semibold">Наши курсы</span>
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Начните свой путь к здоровью</h2>
+            <p className="text-gray-500 text-lg max-w-xl mx-auto">
+              Три авторских курса от практикующих нутрициологов — выберите подходящий и начните уже сегодня
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {COURSES.map((course, idx) => (
+              <div
+                key={course.title}
+                className="group bg-white rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-2 flex flex-col"
+              >
+                {/* Шапка */}
+                <div className={`bg-gradient-to-br ${course.color} p-6 relative overflow-hidden`}>
+                  <div
+                    className="absolute -right-6 -top-6 w-28 h-28 rounded-full opacity-20"
+                    style={{ background: course.accent }}
+                  />
+                  <div className="relative z-10 flex items-start justify-between">
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md"
+                      style={{ background: course.accent }}
+                    >
+                      <Icon name={course.icon as "BookOpen"} size={22} className="text-white" />
+                    </div>
+                    <span className="bg-white/80 backdrop-blur text-gray-700 text-xs font-bold px-3 py-1 rounded-full border border-gray-200">
+                      {course.level}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-gray-900 text-lg mt-4 leading-tight">{course.title}</h3>
+                  <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Icon name="Clock" size={13} />
+                      {course.duration}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Icon name="PlayCircle" size={13} />
+                      {course.lessons}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Тело */}
+                <div className="p-6 flex flex-col flex-1 space-y-4">
+                  <p className="text-gray-500 text-sm leading-relaxed">{course.description}</p>
+
+                  <div>
+                    <div className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Темы курса:</div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {course.topics.map((topic) => (
+                        <div key={topic} className="flex items-center gap-1 text-xs text-gray-600">
+                          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: course.accent }} />
+                          {topic}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-2 border-t border-gray-100 mt-auto">
+                    <Icon name="User" size={14} className="text-gray-400" />
+                    <span className="text-xs text-gray-500">{course.teacher}</span>
+                  </div>
+
+                  <button
+                    className="w-full py-3 rounded-2xl font-bold text-sm text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
+                    style={{ background: `linear-gradient(135deg, ${course.accent}, ${course.accent}cc)` }}
+                  >
+                    Записаться на курс
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Баннер гарантии */}
+          <div className="mt-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-3xl p-8 text-white text-center shadow-xl">
+            <div className="text-4xl mb-3">🛡️</div>
+            <h3 className="text-2xl font-bold mb-2">Гарантия результата</h3>
+            <p className="text-emerald-100 max-w-lg mx-auto">
+              Если в течение 14 дней после начала обучения курс вам не понравится — вернём деньги без вопросов.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FAQ ─── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Частые вопросы</h2>
+            <p className="text-gray-500">Ответы на самые популярные вопросы наших студентов</p>
+          </div>
+          <div className="space-y-3">
+            {[
+              {
+                q: "Нужно ли медицинское образование для прохождения курсов?",
+                a: "Нет! Наши курсы рассчитаны на всех — от полных новичков до специалистов. Мы объясняем сложные вещи простым языком.",
+              },
+              {
+                q: "Сколько времени занимает обучение в день?",
+                a: "Достаточно 30–60 минут в день. Все материалы остаются доступны навсегда, вы можете учиться в удобном темпе.",
+              },
+              {
+                q: "Получу ли я сертификат после обучения?",
+                a: "Да, после успешного прохождения курса и выполнения итогового задания вы получаете именной сертификат.",
+              },
+              {
+                q: "Есть ли живое общение с преподавателями?",
+                a: "Да! Каждый студент получает доступ к закрытому чату, где можно задать вопрос преподавателю и получить ответ в течение 24 часов.",
+              },
+            ].map((faq, i) => (
+              <div key={i} className="border border-gray-100 rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-emerald-50 transition-colors"
+                >
+                  <span className="font-semibold text-gray-800">{faq.q}</span>
+                  <Icon
+                    name="ChevronDown"
+                    size={20}
+                    className={`text-emerald-500 flex-shrink-0 transition-transform duration-300 ${openFaq === i ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {openFaq === i && (
+                  <div className="px-6 pb-5 text-gray-500 leading-relaxed text-sm">{faq.a}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── КОНТАКТЫ ─── */}
+      <section id="contacts" className="py-20 bg-gradient-to-br from-emerald-50 to-green-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 bg-emerald-100 rounded-full px-4 py-2 mb-4">
+              <Icon name="Mail" size={16} className="text-emerald-600" />
+              <span className="text-emerald-700 text-sm font-semibold">Контакты</span>
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Свяжитесь с нами</h2>
+            <p className="text-gray-500 text-lg">Есть вопросы? Мы ответим в течение нескольких часов</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-12 items-start">
+            {/* Форма */}
+            <div className="bg-white rounded-3xl shadow-lg p-8 border border-green-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">Напишите нам</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Ваше имя</label>
+                  <input
+                    type="text"
+                    placeholder="Иван Петров"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition-all text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    placeholder="ivan@example.com"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition-all text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Сообщение</label>
+                  <textarea
+                    rows={4}
+                    placeholder="Хочу узнать подробнее о курсах..."
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition-all text-sm resize-none"
+                  />
+                </div>
+                <button className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold py-4 rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2">
+                  <Icon name="Send" size={18} />
+                  Отправить сообщение
+                </button>
+              </div>
+            </div>
+
+            {/* Контактная информация */}
+            <div className="space-y-6">
+              {[
+                { icon: "Mail", title: "Email", value: "info@pitajsya-pravilno.ru", color: "bg-emerald-50 text-emerald-600" },
+                { icon: "Phone", title: "Телефон", value: "+7 (800) 555-35-35", color: "bg-green-50 text-green-600" },
+                { icon: "Clock", title: "Режим работы", value: "Пн–Пт: 9:00–18:00", color: "bg-lime-50 text-lime-600" },
+                { icon: "MessageCircle", title: "Telegram", value: "@pitajsya_pravilno", color: "bg-teal-50 text-teal-600" },
+              ].map((c) => (
+                <div key={c.title} className="bg-white rounded-2xl p-5 shadow-sm border border-green-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                  <div className={`w-12 h-12 ${c.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                    <Icon name={c.icon as "Mail"} size={22} />
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-400 font-medium">{c.title}</div>
+                    <div className="font-semibold text-gray-800">{c.value}</div>
+                  </div>
+                </div>
+              ))}
+
+              <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl p-6 text-white">
+                <div className="text-3xl mb-2">🥗</div>
+                <h3 className="font-bold text-lg mb-1">Готовы начать?</h3>
+                <p className="text-emerald-100 text-sm leading-relaxed">
+                  Присоединяйтесь к 2500+ студентам, которые уже изменили своё питание и качество жизни.
+                </p>
+                <button
+                  onClick={() => scrollTo("Курсы")}
+                  className="mt-4 bg-white text-emerald-700 font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-emerald-50 transition-colors"
+                >
+                  Выбрать курс →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── ПОДВАЛ ─── */}
+      <footer className="bg-gray-900 text-gray-400 py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center">
+                <span className="text-white text-lg">🥦</span>
+              </div>
+              <div>
+                <div className="font-bold text-white text-sm">Питайся Правильно</div>
+                <div className="text-xs text-emerald-400">Онлайн-школа нутрициологии</div>
+              </div>
+            </div>
+            <nav className="flex flex-wrap gap-4 justify-center">
+              {NAV_LINKS.map((link) => (
+                <button
+                  key={link}
+                  onClick={() => scrollTo(link)}
+                  className="text-sm hover:text-white transition-colors"
+                >
+                  {link}
+                </button>
+              ))}
+            </nav>
+            <p className="text-xs text-center">© 2024 Питайся Правильно. Все права защищены.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
